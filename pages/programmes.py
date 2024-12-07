@@ -48,6 +48,11 @@ class ProgrammesPage(ttk.Frame):
         action_frame = ttk.Frame(header_frame)
         action_frame.pack(side=tk.RIGHT, padx=20)
         
+        # Add Programme button
+        ttk.Button(action_frame,
+                  text="+ Add Programme",
+                  command=self.add_new_programme).pack(side=tk.LEFT, padx=5)
+        
         # Export button
         ttk.Button(action_frame,
                   text="Export Data",
@@ -357,6 +362,62 @@ class ProgrammesPage(ttk.Frame):
         """Export programme statistics to CSV"""
         # TODO: Implement CSV export
         pass
+    
+    def add_new_programme(self):
+        """Open a dialog to add a new programme"""
+        # Create a top-level dialog
+        dialog = tk.Toplevel(self)
+        dialog.title("Add New Programme")
+        dialog.geometry("400x250")
+        dialog.transient(self)
+        dialog.grab_set()
+        
+        # Main frame
+        main_frame = ttk.Frame(dialog, padding=20)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Programme Name
+        ttk.Label(main_frame, text="Programme Name:").pack(anchor="w")
+        programme_var = tk.StringVar()
+        programme_entry = ttk.Entry(main_frame, 
+                                   textvariable=programme_var, 
+                                   width=50)
+        programme_entry.pack(fill=tk.X, pady=(0, 10))
+        
+        # Validation function
+        def validate_and_add():
+            new_programme = programme_var.get().strip()
+            
+            # Validate input
+            if not new_programme:
+                messagebox.showerror("Error", "Programme name cannot be empty")
+                return
+            
+            # Add programme
+            from utils.constants import add_programme
+            success = add_programme(new_programme)
+            
+            if success:
+                messagebox.showinfo("Success", 
+                                   f"Programme '{new_programme}' added successfully!")
+                # Refresh the view
+                self.refresh_view()
+                dialog.destroy()
+            else:
+                messagebox.showerror("Error", 
+                                    f"Programme '{new_programme}' already exists!")
+        
+        # Buttons frame
+        btn_frame = ttk.Frame(main_frame)
+        btn_frame.pack(pady=20)
+        
+        ttk.Button(btn_frame, 
+                  text="Add Programme", 
+                  command=validate_and_add).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(btn_frame, 
+                  text="Cancel", 
+                  command=dialog.destroy).pack(side=tk.LEFT, padx=5)
 
 
 class ProgrammeDetailsDialog(tk.Toplevel):

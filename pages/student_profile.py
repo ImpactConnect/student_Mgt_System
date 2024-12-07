@@ -89,6 +89,13 @@ class StudentProfileDialog(tk.Toplevel):
                                command=self.show_payment_record)
         payment_btn.pack(side=tk.LEFT, padx=5)
         
+        # Delete button
+        delete_btn = ttk.Button(button_frame,
+                              text="🗑️ Delete",
+                              style="Danger.TButton",
+                              command=self.delete_student)
+        delete_btn.pack(side=tk.LEFT, padx=5)
+        
         # Close button - smaller size
         close_btn = ttk.Button(button_frame,
                              text="×",  # Use × symbol
@@ -628,3 +635,39 @@ class StudentProfileDialog(tk.Toplevel):
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to export profile: {str(e)}") 
+
+    def delete_student(self):
+        """
+        Delete the current student record after confirmation
+        """
+        # Confirm deletion
+        confirm = messagebox.askyesno(
+            "Confirm Deletion", 
+            f"Are you sure you want to delete the student record for {self.student_data['name']}?\n\n"
+            "This will permanently remove the student and all associated payment records.\n"
+            "This action CANNOT be undone."
+        )
+        
+        if confirm:
+            # Attempt to delete student
+            success = self.app.db.delete_student(self.reg_number)
+            
+            if success:
+                messagebox.showinfo(
+                    "Student Deleted", 
+                    f"Student record for {self.student_data['name']} has been successfully deleted."
+                )
+                # Close the current dialog
+                self.destroy()
+                
+                # Refresh parent window if possible
+                try:
+                    if hasattr(self.master, 'load_students'):
+                        self.master.load_students()
+                except Exception as e:
+                    print(f"Could not refresh parent window: {e}")
+            else:
+                messagebox.showerror(
+                    "Deletion Failed", 
+                    f"Could not delete student record for {self.student_data['name']}. Please try again."
+                )

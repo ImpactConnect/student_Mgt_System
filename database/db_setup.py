@@ -1233,3 +1233,72 @@ class Database:
             return []
         finally:
             conn.close()
+    
+    def delete_student(self, reg_number):
+        """
+        Delete a student record and all associated payment records
+        
+        Args:
+            reg_number (str): Registration number of the student to delete
+        
+        Returns:
+            bool: True if deletion was successful, False otherwise
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            # Enable foreign key support
+            cursor.execute('PRAGMA foreign_keys = ON')
+            
+            # Start a transaction
+            conn.execute('BEGIN TRANSACTION')
+            
+            # First, delete all payment records for this student
+            cursor.execute('DELETE FROM payments WHERE reg_number = ?', (reg_number,))
+            
+            # Then delete the student record
+            cursor.execute('DELETE FROM students WHERE reg_number = ?', (reg_number,))
+            
+            # Commit the transaction
+            conn.commit()
+            
+            return True
+        
+        except sqlite3.Error as e:
+            # Rollback in case of error
+            conn.rollback()
+            print(f"Error deleting student: {e}")
+            return False
+        
+        finally:
+            conn.close()
+    
+    def delete_payment_record(self, payment_id):
+        """
+        Delete a specific payment record
+        
+        Args:
+            payment_id (int): ID of the payment record to delete
+        
+        Returns:
+            bool: True if deletion was successful, False otherwise
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            # Delete the specific payment record
+            cursor.execute('DELETE FROM payments WHERE payment_id = ?', (payment_id,))
+            
+            conn.commit()
+            return True
+        
+        except sqlite3.Error as e:
+            # Rollback in case of error
+            conn.rollback()
+            print(f"Error deleting payment record: {e}")
+            return False
+        
+        finally:
+            conn.close()
