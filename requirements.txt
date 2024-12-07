@@ -1,0 +1,6 @@
+tkinter
+sqlite3
+pyinstaller==6.3.0
+pillow==9.5.0
+setuptools
+wheel 
